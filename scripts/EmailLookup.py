@@ -1,5 +1,5 @@
 # Imports
-from email_validate import validate
+from email_validator import validate_email, EmailNotValidError
 import requests
 import hashlib
 
@@ -10,19 +10,14 @@ class EmailLookup:
     
     def lookup(self):
         try:
-            # Validate email
-            self.emailValidate = validate(email_address=self.email, check_format=True, check_blacklist=True, check_dns=True, dns_timeout=10, check_smtp=False, smtp_debug=False)
-            if self.emailValidate:
-                haveIBeenPwned = input("You entered a valid email, would you like to check if your email has been pwned? [y/n]: ")
-                if haveIBeenPwned.lower() == "y":
-                    self.haveIBeenPwned()
-                else:
-                    pass
-            else:
-                print("Invalid email address.")
-
+            validate_email(self.email, check_deliverability=True)
+            haveIBeenPwned = input("You entered a valid email, would you like to check if your email has been pwned? [y/n]: ")
+            if haveIBeenPwned.lower() == "y":
+                self.haveIBeenPwned()
+        except EmailNotValidError as e:
+            print(f"Invalid email address: {e}")
         except Exception as e:
-            print(f"Error: {e}. Unable to make a request to Email Lookup. \n")
+            print(f"Error: {e}. An unexpected error occurred during email lookup. \n")
     
     def haveIBeenPwned(self):
         try:
